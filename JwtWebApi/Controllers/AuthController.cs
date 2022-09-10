@@ -1,4 +1,5 @@
 ﻿using JwtWebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -19,6 +20,15 @@ namespace JwtWebApi.Controllers
         public AuthController(IConfiguration configuration)
         {
             _configuration = configuration;
+        }
+
+        [Authorize]
+        [HttpGet]
+        public ActionResult<object> GetMe()
+        {
+            var userName = User?.Identity?.Name;
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            return Ok(new { Name = userName, Role = role });
         }
 
         [HttpPost("register")]
