@@ -19,7 +19,7 @@ namespace JwtWebApi.Controllers
             _logger = logger;
         }
 
-        [Authorize]
+        [Authorize (Roles = "FloridaMan")]
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
