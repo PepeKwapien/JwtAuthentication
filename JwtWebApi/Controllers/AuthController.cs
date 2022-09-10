@@ -15,20 +15,21 @@ namespace JwtWebApi.Controllers
     {
         private static User user = new User();
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
 
-
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, IUserService userService)
         {
             _configuration = configuration;
+            _userService = userService;
         }
 
         [Authorize]
         [HttpGet]
         public ActionResult<object> GetMe()
         {
-            var userName = User?.Identity?.Name;
-            var role = User.FindFirstValue(ClaimTypes.Role);
-            return Ok(new { Name = userName, Role = role });
+            var name = this._userService.GetMyName();
+            var role = this._userService.GetMyRole();
+            return Ok(new { Name = name, Role = role});
         }
 
         [HttpPost("register")]
