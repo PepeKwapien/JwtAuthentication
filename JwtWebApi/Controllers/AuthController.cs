@@ -59,7 +59,57 @@ namespace JwtWebApi.Controllers
 
             string token = CreateToken(user);
 
+            var refreshToken = CreateRefreshToken();
+            SetRefreshToken(refreshToken);
+
             return Ok(token);
+        }
+
+        [Authorize]
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<string>> RefreshToken(UserDto request)
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if(!user.RefreshToken.Equals(refreshToken))
+            {
+                return Unauthorized("Incorrect refresh token");
+            }
+            else if(user.RefreshTokenExpiresAt < DateTime.Now)
+            {
+                return Unauthorized("Refresh token has expired");
+            }
+
+            var token = CreateToken(user);
+            var newRefreshToken = CreateRefreshToken();
+            SetRefreshToken(newRefreshToken);
+
+            return Ok(token);
+        }
+
+        private RefreshToken CreateRefreshToken()
+        {
+            var refreshToken = new RefreshToken()
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64))
+            };
+
+            return refreshToken;
+        }
+
+        private void SetRefreshToken(RefreshToken refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = refreshToken.ExpiresAt
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+
+            user.RefreshToken = refreshToken.Token;
+            user.RefreshTokenCreatedAt = refreshToken.CreatedAt;
+            user.RefreshTokenExpiresAt = refreshToken.ExpiresAt;
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
