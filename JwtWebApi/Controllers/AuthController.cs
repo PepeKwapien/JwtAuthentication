@@ -48,7 +48,7 @@ namespace JwtWebApi.Controllers
 
             string token = CreateToken(user);
 
-            return Ok("Token");
+            return Ok(token);
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
